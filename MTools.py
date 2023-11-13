@@ -62,4 +62,82 @@ def Comunizador(comuna):
     return comuna in L_comunas
     
     
+def reco_open(File):
+    import pandas as pd
+    
+    Hojas = pd.ExcelFile(File).sheet_names
+    
+    # Import hoja ReconA
+    
+    recoa = pd.read_excel('RECO.xlsx', sheet_name = Hojas[0])
 
+    recoa_cols = ['REGION CONTROL FRONTERIZO','AVANZADA O LUGAR DONDE SE MATERIALIZÓ LA RECONDUCCIÓN ','FECHA DE LA RECONDUCCIÓN DEL INDIVIDUO',
+                  'AUTORIDAD QUE SORPRENDE EL INTENTO DE INGRESO AL PAÍS','NACIONALIDAD', 'SEXO ','EDAD', 'SITUACIÓN EXTRANJERO ']
+
+    ['region', 'avanzada', 'fecha', 'autoridad', 'nacionalidad', 'sexo', 'edad', 'situacion']
+    
+    recoa = recoa[recoa_cols]
+
+    recoa['grupo'] = 'Adulto'
+
+    recoa.columns = ['region', 'avanzada', 'fecha', 'autoridad', 'nacionalidad', 'sexo', 'edad', 'situacion', 'grupo']
+    
+    # Import hoja RecoNNA
+    
+    reconna = pd.read_excel('RECO.xlsx', sheet_name = Hojas[1])
+
+    reconna = reconna[['REGION','AVANZADA', 'FECHA','NACIONALIDAD', 'SEXO ', 'EDAD ']]
+
+    reconna['situacion'] = 'RECONDUCCIÓN MATERIALIZADA'
+
+    reconna['grupo'] = 'NNA'
+
+    reconna['autoridad'] = 'NNA'
+
+    reconna = reconna[['REGION', 'AVANZADA', 'FECHA', 'autoridad', 'NACIONALIDAD', 'SEXO ', 'EDAD ', 'situacion', 'grupo']]
+
+    reconna.columns = ['region', 'avanzada', 'fecha', 'autoridad', 'nacionalidad', 'sexo', 'edad', 'situacion', 'grupo']
+    
+    # Import NoRecoA
+    
+    Noreco = pd.read_excel('RECO.xlsx', sheet_name = Hojas[2])
+
+
+    Noreco_cols = ['REGION CONTROL FRONTERIZO','AVANZADA O LUGAR DONDE FUE SORPRENDIDO ',
+                   'FECHA DEL INTENTO DE INGRESO AL PAÍS','AUTORIDAD QUE SORPRENDE EL INTENTO DE INGRESO AL PAÍS','NACIONALIDAD', 'SEXO ','EDAD ','SITUACIÓN EXTRANJERO ']
+
+    Noreco = Noreco[Noreco_cols]
+
+    Noreco['grupo'] = 'Adulto'
+
+    Noreco.columns = ['region', 'avanzada', 'fecha', 'autoridad', 'nacionalidad', 'sexo', 'edad', 'situacion', 'grupo']
+    
+    # Import NoRecoNNA
+    
+    Noreconna = pd.read_excel('RECO.xlsx', sheet_name = Hojas[3])
+
+    Noreconna_cols = ['REGION', 'AVANZADA EVADIDA','FECHA DEL HECHO', 'NACIONALIDAD (PAÍS)', 'SEXO ', 'EDAD ']
+
+    Noreconna = Noreconna[Noreconna_cols]
+
+    Noreconna['situacion'] = 'NO MATERIALIZADA'
+
+    Noreconna['grupo'] = 'NNA'
+
+    Noreconna['autoridad'] = 'NNA'
+
+    Noreconna = Noreconna[['REGION', 'AVANZADA EVADIDA', 'FECHA DEL HECHO', 'autoridad', 'NACIONALIDAD (PAÍS)', 'SEXO ', 'EDAD ', 'situacion', 'grupo']]
+
+    Noreconna.columns = ['region', 'avanzada', 'fecha', 'autoridad', 'nacionalidad', 'sexo', 'edad', 'situacion', 'grupo']
+    
+    # DF final
+    
+    df = pd.concat([recoa,reconna,Noreco,Noreconna])
+
+    df['avanzada'] = df['avanzada'].str.replace('(AVANZADA|PASO)', '', regex = True).str.strip()
+    #df['region'] = df['region'].str.replace('(REGIÓN\s*DE\s*)', '', regex = True).str.strip()
+    df['sexo'] = df['sexo'].str.upper().str.strip()
+    
+    df['region'] = df['region'].apply(regiones)
+    
+    return df
