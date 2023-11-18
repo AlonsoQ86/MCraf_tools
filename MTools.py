@@ -141,3 +141,27 @@ def reco_open(File):
     df['region'] = df['region'].apply(regiones)
     
     return df
+
+def barPlot(df,X, Y, Umbral = 0.01, Otro = 'OTRA',
+            Max_color = '#eb4034', Other_color = '#d4cadb',
+            Title = 'Some Text:'):
+  
+  import pandas as pd
+  import matplotlib.pyplot as plt
+  
+  _ = df
+  T = _[Y].sum()
+  Z = list(zip(_[X], [t/T for t in _[Y]]))
+  Z = [z[0] if z[1] > Umbral else Otro for z in Z ]
+
+  _['RECO'] = Z
+
+  _['COLORS'] = [Other_color] * (len(_[X])-1) + [Max_color]
+
+  fig, ax = plt.subplots()
+  ax.barh(_['RECO'], _[Y], color = _['COLORS'])
+  ax.set_title(Title)
+  ax.set_ylabel(X)
+  ax.set_xlabel(Y)
+  
+  return [_, fig]
